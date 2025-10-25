@@ -15,11 +15,11 @@ app.get("/health", (req, res) => {
 });
 
 app.get("*", async (req, res) => {
+  const host = req.hostname;
+  const id = host.split(".")[0];
+  const filePath = req.path;
+  
   try {
-    const host = req.hostname;
-    const id = host.split(".")[0];
-    const filePath = req.path;
-    
     // Skip favicon requests to reduce noise
     if (filePath === "/favicon.ico") {
       return res.status(404).send("Not found");
@@ -86,7 +86,7 @@ app.get("*", async (req, res) => {
     if (error.name !== 'NoSuchKey') {
       console.error("Error serving file:", error);
     } else {
-      console.log(`File not found: dist/${host.split(".")[0]}${req.path}`);
+      console.log(`File not found: dist/${id}${req.path}`);
     }
     
     res.status(404).send(`
@@ -94,7 +94,7 @@ app.get("*", async (req, res) => {
         <head><title>File Not Found</title></head>
         <body>
           <h1>🚢 File Not Found</h1>
-          <p>The requested file could not be found in deployment <strong>${host.split(".")[0]}</strong>.</p>
+          <p>The requested file could not be found in deployment <strong>${id}</strong>.</p>
           <p>This could mean:</p>
           <ul>
             <li>The deployment is still in progress</li>
