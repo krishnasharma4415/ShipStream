@@ -21,7 +21,7 @@ services:
       - key: REDIS_URL
         sync: false
       - key: FRONTEND_URL
-        sync: false
+        value: http://localhost:5173
     healthCheckPath: /health
 
   # Request Handler - Serves deployed applications
