@@ -3,8 +3,8 @@ services:
   - type: web
     name: deployfast-upload-service
     runtime: node
-    buildCommand: cd upload-service && npm install && npm run build
-    startCommand: cd upload-service && npm start
+    buildCommand: cd server/upload-service && npm install && npm run build
+    startCommand: cd server/upload-service && npm start
     plan: free
     region: oregon
     envVars:
@@ -28,8 +28,8 @@ services:
   - type: web
     name: deployfast-request-handler
     runtime: node
-    buildCommand: cd request-handler && npm install && npm run build
-    startCommand: cd request-handler && npm start
+    buildCommand: cd server/request-handler && npm install && npm run build
+    startCommand: cd server/request-handler && npm start
     plan: free
     region: oregon
     envVars:
@@ -49,8 +49,8 @@ services:
   - type: worker
     name: deployfast-deploy-service
     runtime: node
-    buildCommand: cd deploy-service && npm install && npm run build
-    startCommand: cd deploy-service && npm start
+    buildCommand: cd server/deploy-service && npm install && npm run build
+    startCommand: cd server/deploy-service && npm start
     plan: free
     region: oregon
     envVars:
