@@ -7,22 +7,21 @@ import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DeploymentHistory } from "./deployment-history"
 import { ThemeToggle } from "./theme-toggle"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import axios from "axios"
-import { 
-  Github, 
-  Rocket, 
-  CheckCircle, 
-  AlertCircle, 
-  ExternalLink, 
+import pirateShipLogo from "../assets/pirate-ship.png"
+import {
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
   Copy,
   Clock,
   Upload,
   Settings,
-  Zap
+  Anchor
 } from "lucide-react"
 
-const BACKEND_UPLOAD_URL = "http://localhost:5500";
+const BACKEND_UPLOAD_URL = import.meta.env.VITE_API_URL || "http://localhost:5500";
 
 interface DeploymentStatus {
   status: 'idle' | 'uploading' | 'uploaded' | 'building' | 'deployed' | 'failed';
@@ -57,50 +56,50 @@ export function Landing() {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'uploading':
-        return { 
-          variant: 'warning' as const, 
-          icon: Upload, 
-          text: 'Uploading', 
+        return {
+          variant: 'warning' as const,
+          icon: Upload,
+          text: 'Loading Cargo',
           progress: 25,
-          message: 'Cloning repository and uploading files...'
+          message: 'Gathering your code treasures and loading them aboard...'
         };
       case 'uploaded':
-        return { 
-          variant: 'warning' as const, 
-          icon: Clock, 
-          text: 'Queued', 
+        return {
+          variant: 'warning' as const,
+          icon: Clock,
+          text: 'Awaiting Departure',
           progress: 50,
-          message: 'Build queued, waiting for deployment...'
+          message: 'Ship is loaded and waiting for favorable winds...'
         };
       case 'building':
-        return { 
-          variant: 'warning' as const, 
-          icon: Settings, 
-          text: 'Building', 
+        return {
+          variant: 'warning' as const,
+          icon: Settings,
+          text: 'Setting Sail',
           progress: 75,
-          message: 'Installing dependencies and building project...'
+          message: 'Hoisting the sails and navigating to production waters...'
         };
       case 'deployed':
-        return { 
-          variant: 'success' as const, 
-          icon: CheckCircle, 
-          text: 'Deployed', 
+        return {
+          variant: 'success' as const,
+          icon: CheckCircle,
+          text: 'Anchored',
           progress: 100,
-          message: 'Successfully deployed!'
+          message: 'Ship has successfully reached port!'
         };
       case 'failed':
-        return { 
-          variant: 'destructive' as const, 
-          icon: AlertCircle, 
-          text: 'Failed', 
+        return {
+          variant: 'destructive' as const,
+          icon: AlertCircle,
+          text: 'Shipwrecked',
           progress: 0,
-          message: 'Deployment failed. Please try again.'
+          message: 'Encountered rough seas. Please try launching again.'
         };
       default:
-        return { 
-          variant: 'default' as const, 
-          icon: Rocket, 
-          text: 'Ready', 
+        return {
+          variant: 'default' as const,
+          icon: Anchor,
+          text: 'Ready to Sail',
           progress: 0,
           message: ''
         };
@@ -110,7 +109,7 @@ export function Landing() {
   const saveDeployment = (id: string, repoUrl: string, status: string) => {
     const deployments = JSON.parse(localStorage.getItem('deployments') || '[]');
     const existingIndex = deployments.findIndex((d: any) => d.id === id);
-    
+
     const deployment = {
       id,
       repoUrl,
@@ -140,26 +139,26 @@ export function Landing() {
     }
 
     setError("");
-    setDeploymentStatus({ status: 'uploading', progress: 25, message: 'Starting deployment...' });
+    setDeploymentStatus({ status: 'uploading', progress: 25, message: 'Preparing to set sail...' });
 
     try {
       const res = await axios.post(`${BACKEND_UPLOAD_URL}/send-url`, {
         repoUrl: repoUrl
       });
-      
+
       setUploadId(res.data.generated);
       setDeployedUrl(`http://${res.data.generated}.localhost:3000`);
-      
+
       // Save initial deployment
       saveDeployment(res.data.generated, repoUrl, 'uploading');
-      
+
       // Poll for status updates
       const interval = setInterval(async () => {
         try {
           const response = await axios.get(`${BACKEND_UPLOAD_URL}/status?id=${res.data.generated}`);
           const status = response.data.status;
           const config = getStatusConfig(status);
-          
+
           setDeploymentStatus({
             status: status,
             progress: config.progress,
@@ -178,8 +177,8 @@ export function Landing() {
       }, 2000);
 
     } catch (err) {
-      setError("Failed to start deployment. Please check your connection and try again.");
-      setDeploymentStatus({ status: 'failed', progress: 0, message: 'Deployment failed' });
+      setError("Failed to launch your ship. Please check your connection and try again.");
+      setDeploymentStatus({ status: 'failed', progress: 0, message: 'Ship launch failed' });
     }
   };
 
@@ -187,14 +186,18 @@ export function Landing() {
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-100 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900">
       {/* Header */}
       <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Zap className="h-6 w-6 text-blue-600" />
-              <h1 className="text-xl font-bold">DeployFast</h1>
+            <div className="flex items-center space-x-3">
+              <img
+                src={pirateShipLogo}
+                alt="ShipStream Logo"
+                className="h-8 w-8 object-contain"
+              />
+              <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">ShipStream</h1>
               <Badge variant="secondary" className="ml-2">Beta</Badge>
             </div>
             <ThemeToggle />
@@ -205,13 +208,20 @@ export function Landing() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto space-y-8">
           {/* Hero Section */}
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-6">
+            <div className="flex justify-center mb-6">
+              <img
+                src={pirateShipLogo}
+                alt="ShipStream"
+                className="h-20 w-20 object-contain animate-pulse-slow"
+              />
+            </div>
             <h2 className="text-4xl font-bold tracking-tight">
-              Deploy your GitHub repository
+              Set sail with your GitHub repository
               <span className="text-blue-600"> instantly</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-              Connect your GitHub repository and get it deployed in seconds with automatic builds and custom domains.
+              Navigate your code to production with ShipStream. Deploy any GitHub repository in seconds with automatic builds and smooth sailing to live domains.
             </p>
           </div>
 
@@ -219,17 +229,17 @@ export function Landing() {
           <Card className="shadow-lg border-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl flex items-center gap-2">
-                <Github className="h-5 w-5" />
-                Repository Deployment
+                <Anchor className="h-5 w-5 text-blue-600" />
+                Ship Your Repository
               </CardTitle>
               <CardDescription>
-                Enter your GitHub repository URL to start the deployment process
+                Drop anchor on your GitHub repository URL and let ShipStream navigate it to production
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="github-url">GitHub Repository URL</Label>
-                <Input 
+                <Input
                   id="github-url"
                   value={repoUrl}
                   onChange={(e) => setRepoUrl(e.target.value)}
@@ -245,7 +255,7 @@ export function Landing() {
                 )}
               </div>
 
-              <Button 
+              <Button
                 onClick={handleDeploy}
                 disabled={!repoUrl || (deploymentStatus.status !== 'idle' && deploymentStatus.status !== 'failed')}
                 className="w-full text-base py-6"
@@ -253,8 +263,8 @@ export function Landing() {
               >
                 {deploymentStatus.status === 'idle' || deploymentStatus.status === 'failed' ? (
                   <>
-                    <Rocket className="mr-2 h-4 w-4" />
-                    Deploy Repository
+                    <Anchor className="mr-2 h-4 w-4" />
+                    Set Sail & Deploy
                   </>
                 ) : (
                   <>
@@ -291,7 +301,7 @@ export function Landing() {
                   </div>
                   <Progress value={deploymentStatus.progress} className="h-2" />
                 </div>
-                
+
                 {deploymentStatus.message && (
                   <Alert variant={deploymentStatus.status === 'failed' ? 'destructive' : 'default'}>
                     <AlertDescription>{deploymentStatus.message}</AlertDescription>
@@ -307,24 +317,24 @@ export function Landing() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-300">
                   <CheckCircle className="h-5 w-5" />
-                  Deployment Successful!
+                  Ship Has Reached Port! 🚢
                 </CardTitle>
                 <CardDescription className="text-green-600 dark:text-green-400">
-                  Your application is now live and accessible
+                  Your application has successfully sailed to production and is now live
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="deployed-url">Deployed URL</Label>
                   <div className="flex gap-2">
-                    <Input 
-                      id="deployed-url" 
-                      readOnly 
+                    <Input
+                      id="deployed-url"
+                      readOnly
                       value={deployedUrl}
                       className="bg-white dark:bg-slate-800"
                     />
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="icon"
                       onClick={() => copyToClipboard(deployedUrl)}
                     >
@@ -332,16 +342,16 @@ export function Landing() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button asChild className="flex-1">
                     <a href={deployedUrl} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
-                      Visit Website
+                      Board Your Ship
                     </a>
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       setDeploymentStatus({ status: 'idle', progress: 0, message: '' });
                       setUploadId('');
@@ -349,7 +359,7 @@ export function Landing() {
                       setRepoUrl('');
                     }}
                   >
-                    Deploy Another
+                    Launch Another Ship
                   </Button>
                 </div>
               </CardContent>

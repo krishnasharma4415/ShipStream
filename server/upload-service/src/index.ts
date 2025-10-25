@@ -1,18 +1,29 @@
 import express from "express";
+import cors from "cors";
 import { random } from "./randomGenerate";
 import simpleGit from "simple-git";
 import { getAllFiles } from "./getAllfiles";
 import path from "path";
 import { upload } from "./upload";
-import { createClient } from "redis";
+import { createRedisClient } from "./redisClient";
 
 const app = express();
-app.use(express.json());
-const publisher = createClient();
-publisher.connect();
 
-const subscriber = createClient();
-subscriber.connect();
+// CORS configuration
+app.use(cors({
+  origin: process.env.FRONTEND_URL || ["http://localhost:5173", "http://localhost:3000"],
+  credentials: true
+}));
+
+app.use(express.json());
+
+// Initialize Redis clients
+const publisher = createRedisClient();
+const subscriber = createRedisClient();
+
+// Connect to Redis
+publisher.connect().catch(console.error);
+subscriber.connect().catch(console.error);
 
 app.post("/send-url", async (req, res) => {
   const repoUrl = req.body.repoUrl;
@@ -38,6 +49,18 @@ app.get("/status", async (req, res) => {
   });
 });
 
-app.listen(5500, () => {
-  console.log("App is running at 5500");
+// Health check endpoint for Render.com
+app.get("/health", (req, res) => {
+  res.json({ 
+    status: "healthy", 
+    service: "upload-service",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+const PORT = process.env.PORT || 5500;
+
+app.listen(PORT, () => {
+  console.log(`Upload service running on port ${PORT}`);
 });

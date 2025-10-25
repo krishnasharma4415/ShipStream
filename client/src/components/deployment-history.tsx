@@ -38,11 +38,11 @@ export function DeploymentHistory() {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'deployed':
-        return { variant: 'success' as const, icon: CheckCircle, text: 'Deployed' };
+        return { variant: 'success' as const, icon: CheckCircle, text: 'Anchored' };
       case 'building':
-        return { variant: 'warning' as const, icon: Settings, text: 'Building' };
+        return { variant: 'warning' as const, icon: Settings, text: 'Sailing' };
       case 'failed':
-        return { variant: 'destructive' as const, icon: AlertCircle, text: 'Failed' };
+        return { variant: 'destructive' as const, icon: AlertCircle, text: 'Shipwrecked' };
       default:
         return { variant: 'default' as const, icon: Clock, text: 'Unknown' };
     }
@@ -69,17 +69,17 @@ export function DeploymentHistory() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Deployment History
+            Ship's Log
           </CardTitle>
           <CardDescription>
-            Your recent deployments will appear here
+            Your recent voyages will appear here
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
             <Github className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>No deployments yet</p>
-            <p className="text-sm">Deploy your first repository to get started</p>
+            <p>No voyages yet</p>
+            <p className="text-sm">Launch your first ship to start your journey</p>
           </div>
         </CardContent>
       </Card>
@@ -91,10 +91,10 @@ export function DeploymentHistory() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
-          Deployment History
+          Ship's Log
         </CardTitle>
         <CardDescription>
-          {deployments.length} deployment{deployments.length !== 1 ? 's' : ''}
+          {deployments.length} voyage{deployments.length !== 1 ? 's' : ''} recorded
         </CardDescription>
       </CardHeader>
       <CardContent>

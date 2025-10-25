@@ -19,13 +19,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.downloadS3Folder = downloadS3Folder;
+exports.downloadR2Folder = downloadR2Folder;
 exports.copyFinalDist = copyFinalDist;
 const client_s3_1 = require("@aws-sdk/client-s3");
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const r2Client_1 = require("./r2Client");
-function downloadS3Folder(prefix) {
+function downloadR2Folder(prefix) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
         const command = new client_s3_1.ListObjectsV2Command({
@@ -80,7 +80,7 @@ function downloadS3Folder(prefix) {
                 }
             }));
         }))) || [];
-        console.log("awaiting");
+        console.log("Downloading files from R2...");
         yield Promise.all(allPromises === null || allPromises === void 0 ? void 0 : allPromises.filter((x) => x !== undefined));
     });
 }

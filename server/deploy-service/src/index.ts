@@ -1,13 +1,15 @@
-import { createClient, commandOptions } from "redis";
-import { copyFinalDist, downloadS3Folder } from "./aws";
-import express from "express";
+import { commandOptions } from "redis";
+import { copyFinalDist, downloadR2Folder } from "./r2Storage";
 import { buildProject } from "./execute";
+import { createRedisClient } from "./redisClient";
 
-const subscriber = createClient();
-subscriber.connect();
+// Initialize Redis clients
+const subscriber = createRedisClient();
+const publisher = createRedisClient();
 
-const publisher = createClient();
-publisher.connect();
+// Connect to Redis
+subscriber.connect().catch(console.error);
+publisher.connect().catch(console.error);
 
 async function sub() {
   while (true) {
@@ -20,7 +22,7 @@ async function sub() {
 
       if (response) {
         const id = response.element[1];
-        await downloadS3Folder(`output${id}`);
+        await downloadR2Folder(`output${id}`);
         await buildProject(id);
         copyFinalDist(id);
         publisher.hSet("status", id, "deployed");

@@ -1,9 +1,4 @@
-import { useEffect } from 'react'
 
-interface AnalyticsEvent {
-  event: string
-  properties?: Record<string, any>
-}
 
 export function useAnalytics() {
   const track = (event: string, properties?: Record<string, any>) => {

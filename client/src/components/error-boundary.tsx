@@ -29,15 +29,15 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-100 dark:from-slate-900 dark:via-blue-900 dark:to-slate-900 flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
                 <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
-              <CardTitle>Something went wrong</CardTitle>
+              <CardTitle>Ship ran aground! ⚓</CardTitle>
               <CardDescription>
-                An unexpected error occurred. Please try refreshing the page.
+                Encountered rough seas. Please try refreshing to get back on course.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -53,7 +53,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 className="w-full"
               >
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh Page
+                Set Sail Again
               </Button>
             </CardContent>
           </Card>

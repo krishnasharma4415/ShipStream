@@ -10,12 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const redis_1 = require("redis");
-const aws_1 = require("./aws");
+const r2Storage_1 = require("./r2Storage");
 const execute_1 = require("./execute");
-const subscriber = (0, redis_1.createClient)();
-subscriber.connect();
-const publisher = (0, redis_1.createClient)();
-publisher.connect();
+const redisClient_1 = require("./redisClient");
+// Initialize Redis clients
+const subscriber = (0, redisClient_1.createRedisClient)();
+const publisher = (0, redisClient_1.createRedisClient)();
+// Connect to Redis
+subscriber.connect().catch(console.error);
+publisher.connect().catch(console.error);
 function sub() {
     return __awaiter(this, void 0, void 0, function* () {
         while (true) {
@@ -23,9 +26,9 @@ function sub() {
                 const response = yield subscriber.brPop((0, redis_1.commandOptions)({ isolated: true }), "build-queue", 0);
                 if (response) {
                     const id = response.element[1];
-                    yield (0, aws_1.downloadS3Folder)(`output${id}`);
+                    yield (0, r2Storage_1.downloadR2Folder)(`output${id}`);
                     yield (0, execute_1.buildProject)(id);
-                    (0, aws_1.copyFinalDist)(id);
+                    (0, r2Storage_1.copyFinalDist)(id);
                     publisher.hSet("status", id, "deployed");
                 }
             }

@@ -1,0 +1,68 @@
+services:
+  # Upload Service - Handles repository cloning and upload to R2
+  - type: web
+    name: deployfast-upload-service
+    runtime: node
+    buildCommand: cd upload-service && npm install && npm run build
+    startCommand: cd upload-service && npm start
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+    healthCheckPath: /health
+
+  # Request Handler - Serves deployed applications
+  - type: web
+    name: deployfast-request-handler
+    runtime: node
+    buildCommand: cd request-handler && npm install && npm run build
+    startCommand: cd request-handler && npm start
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+    healthCheckPath: /health
+
+  # Deploy Service - Background worker for building projects
+  - type: worker
+    name: deployfast-deploy-service
+    runtime: node
+    buildCommand: cd deploy-service && npm install && npm run build
+    startCommand: cd deploy-service && npm start
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_BUCKET_NAME
+        sync: false
+      - key: REDIS_URL
+        sync: false

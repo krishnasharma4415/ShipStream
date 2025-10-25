@@ -13,23 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.upload = upload;
-const aws_sdk_1 = require("aws-sdk");
+const client_s3_1 = require("@aws-sdk/client-s3");
 const fs_1 = __importDefault(require("fs"));
-const s3 = new aws_sdk_1.S3({
-    accessKeyId: process.env.ACCESSID,
-    secretAccessKey: process.env.ACCESSKEY,
-    endpoint: process.env.ENDPOINT,
-});
+const r2Client_1 = require("./r2Client");
 function upload(file, fileName) {
     return __awaiter(this, void 0, void 0, function* () {
         const fileContent = fs_1.default.readFileSync(file);
-        const response = yield s3
-            .upload({
-            Body: fileContent,
-            Bucket: "vercel",
+        const command = new client_s3_1.PutObjectCommand({
+            Bucket: r2Client_1.BUCKET_NAME,
             Key: fileName,
-        })
-            .promise();
-        console.log(response);
+            Body: fileContent,
+        });
+        try {
+            const response = yield r2Client_1.r2Client.send(command);
+            console.log(`Uploaded ${fileName} to R2:`, response);
+        }
+        catch (error) {
+            console.error(`Error uploading ${fileName}:`, error);
+            throw error;
+        }
     });
 }

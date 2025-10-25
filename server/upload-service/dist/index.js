@@ -13,18 +13,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const randomGenerate_1 = require("./randomGenerate");
 const simple_git_1 = __importDefault(require("simple-git"));
 const getAllfiles_1 = require("./getAllfiles");
 const path_1 = __importDefault(require("path"));
 const upload_1 = require("./upload");
-const redis_1 = require("redis");
+const redisClient_1 = require("./redisClient");
 const app = (0, express_1.default)();
+// CORS configuration
+app.use((0, cors_1.default)({
+    origin: process.env.FRONTEND_URL || ["http://localhost:5173", "http://localhost:3000"],
+    credentials: true
+}));
 app.use(express_1.default.json());
-const publisher = (0, redis_1.createClient)();
-publisher.connect();
-const subscriber = (0, redis_1.createClient)();
-subscriber.connect();
+// Initialize Redis clients
+const publisher = (0, redisClient_1.createRedisClient)();
+const subscriber = (0, redisClient_1.createRedisClient)();
+// Connect to Redis
+publisher.connect().catch(console.error);
+subscriber.connect().catch(console.error);
 app.post("/send-url", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const repoUrl = req.body.repoUrl;
     const id = (0, randomGenerate_1.random)();
@@ -47,6 +55,7 @@ app.get("/status", (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         status: response,
     });
 }));
-app.listen(5500, () => {
-    console.log("App is running at 5500");
+const PORT = process.env.PORT || 5500;
+app.listen(PORT, () => {
+    console.log(`Upload service running on port ${PORT}`);
 });

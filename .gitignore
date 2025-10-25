@@ -1,5 +1,4 @@
-/server/upload-service/node_modules
-/server/deploy-service/node_modules
-/server/request-handler/node_modules
-client/node_modules
-.ENV
+node_modules
+.env
+.env.local
+.env.example
