@@ -14,7 +14,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.get("/*", async (req, res) => {
+app.get("*", async (req, res) => {
   try {
     const host = req.hostname;
     const id = host.split(".")[0];
