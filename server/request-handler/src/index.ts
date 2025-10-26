@@ -19,6 +19,38 @@ app.get("*", async (req, res) => {
   const id = host.split(".")[0];
   const filePath = req.path;
   
+  // Handle direct access to request-handler service
+  if (host.includes('request-handler') && host.includes('onrender.com')) {
+    return res.send(`
+      <html>
+        <head><title>ShipStream Request Handler</title></head>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px;">
+          <h1>🚢 ShipStream Request Handler</h1>
+          <p>This is the request handler service for ShipStream deployments.</p>
+          
+          <h2>How it works:</h2>
+          <ul>
+            <li>Deploy applications using the upload service</li>
+            <li>Access deployed apps via subdomain: <code>{deployment-id}.yourdomain.com</code></li>
+            <li>This service serves the built files from Cloudflare R2</li>
+          </ul>
+          
+          <h2>Service Status:</h2>
+          <p>✅ Request Handler is running and healthy</p>
+          <p>🔗 <a href="/health">Health Check</a></p>
+          
+          <h2>Example Usage:</h2>
+          <p>After deploying an app with ID <code>abc123</code>, access it at:</p>
+          <code>http://abc123.localhost:3000</code> (local)<br>
+          <code>http://abc123.yourdomain.com</code> (production)
+          
+          <hr style="margin: 30px 0;">
+          <p><small>ShipStream - Deploy any GitHub repository instantly</small></p>
+        </body>
+      </html>
+    `);
+  }
+  
   try {
     // Skip favicon requests to reduce noise
     if (filePath === "/favicon.ico") {
