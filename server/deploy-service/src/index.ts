@@ -5,7 +5,6 @@ import path from "path";
 dotenv.config({ path: path.join(__dirname, "../../.env") });
 
 import express from "express";
-import { commandOptions } from "redis";
 import { copyFinalDist, downloadR2Folder } from "./r2Storage";
 import { buildProject } from "./execute";
 import { createRedisClient } from "./redisClient";
@@ -13,31 +12,28 @@ import { createRedisClient } from "./redisClient";
 const app = express();
 app.use(express.json());
 
-// Initialize Redis clients
-const subscriber = createRedisClient();
-const publisher = createRedisClient();
+// Initialize Redis client
+const redisClient = createRedisClient();
 
 // Connect to Redis
-subscriber.connect().catch(console.error);
-publisher.connect().catch(console.error);
+redisClient.connect().catch(console.error);
 
 async function processQueue() {
   try {
     while (true) {
-      const response = await subscriber.brPop(
-        commandOptions({ isolated: true }),
+      const response = await redisClient.brPop(
         "build-queue",
         1 // 1 second timeout instead of blocking indefinitely
       );
 
       if (response) {
-        const id = response.element[1];
+        const id = response.element;
         console.log(`Processing deployment for ID: ${id}`);
         
-        await downloadR2Folder(`output${id}`);
+        await downloadR2Folder(`output/${id}/`);
         await buildProject(id);
         copyFinalDist(id);
-        publisher.hSet("status", id, "deployed");
+        redisClient.hSet("status", id, "deployed");
         
         console.log(`Deployment completed for ID: ${id}`);
       } else {

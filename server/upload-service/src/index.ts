@@ -38,13 +38,11 @@ app.use(cors({
 
 app.use(express.json());
 
-// Initialize Redis clients
-const publisher = createRedisClient();
-const subscriber = createRedisClient();
+// Initialize Redis client (only need publisher for upload service)
+const redisClient = createRedisClient();
 
 // Connect to Redis
-publisher.connect().catch(console.error);
-subscriber.connect().catch(console.error);
+redisClient.connect().catch(console.error);
 
 app.post("/send-url", async (req, res) => {
   const repoUrl = req.body.repoUrl;
@@ -54,13 +52,15 @@ app.post("/send-url", async (req, res) => {
   await git.clone(repoUrl, outputPath);
   const files = getAllFiles(outputPath);
   files.forEach(async (element) => {
-    await upload(element, element.slice(__dirname.length + 1));
+    // Convert Windows backslashes to forward slashes for R2 compatibility
+    const relativePath = element.slice(__dirname.length + 1).replace(/\\/g, '/');
+    await upload(element, relativePath);
   });
   await new Promise((resolve) => setTimeout(resolve, 5000));
   
   // Queue the job in Redis
-  publisher.lPush("build-queue", id);
-  publisher.hSet("status", id, "uploaded");
+  redisClient.lPush("build-queue", id);
+  redisClient.hSet("status", id, "uploaded");
   
   // Trigger the deploy service
   try {
@@ -86,7 +86,7 @@ app.post("/send-url", async (req, res) => {
 
 app.get("/status", async (req, res) => {
   const id = req.query.id;
-  const response = await subscriber.hGet("status", id as string);
+  const response = await redisClient.hGet("status", id as string);
   res.json({
     status: response,
   });

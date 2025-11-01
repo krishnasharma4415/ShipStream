@@ -17,31 +17,28 @@ const path_1 = __importDefault(require("path"));
 // Load environment variables from server/.env
 dotenv_1.default.config({ path: path_1.default.join(__dirname, "../../.env") });
 const express_1 = __importDefault(require("express"));
-const redis_1 = require("redis");
 const r2Storage_1 = require("./r2Storage");
 const execute_1 = require("./execute");
 const redisClient_1 = require("./redisClient");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-// Initialize Redis clients
-const subscriber = (0, redisClient_1.createRedisClient)();
-const publisher = (0, redisClient_1.createRedisClient)();
+// Initialize Redis client
+const redisClient = (0, redisClient_1.createRedisClient)();
 // Connect to Redis
-subscriber.connect().catch(console.error);
-publisher.connect().catch(console.error);
+redisClient.connect().catch(console.error);
 function processQueue() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             while (true) {
-                const response = yield subscriber.brPop((0, redis_1.commandOptions)({ isolated: true }), "build-queue", 1 // 1 second timeout instead of blocking indefinitely
+                const response = yield redisClient.brPop("build-queue", 1 // 1 second timeout instead of blocking indefinitely
                 );
                 if (response) {
-                    const id = response.element[1];
+                    const id = response.element;
                     console.log(`Processing deployment for ID: ${id}`);
-                    yield (0, r2Storage_1.downloadR2Folder)(`output${id}`);
+                    yield (0, r2Storage_1.downloadR2Folder)(`output/${id}/`);
                     yield (0, execute_1.buildProject)(id);
                     (0, r2Storage_1.copyFinalDist)(id);
-                    publisher.hSet("status", id, "deployed");
+                    redisClient.hSet("status", id, "deployed");
                     console.log(`Deployment completed for ID: ${id}`);
                 }
                 else {

@@ -46,12 +46,10 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use(express_1.default.json());
-// Initialize Redis clients
-const publisher = (0, redisClient_1.createRedisClient)();
-const subscriber = (0, redisClient_1.createRedisClient)();
+// Initialize Redis client (only need publisher for upload service)
+const redisClient = (0, redisClient_1.createRedisClient)();
 // Connect to Redis
-publisher.connect().catch(console.error);
-subscriber.connect().catch(console.error);
+redisClient.connect().catch(console.error);
 app.post("/send-url", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const repoUrl = req.body.repoUrl;
     const id = (0, randomGenerate_1.random)();
@@ -60,12 +58,14 @@ app.post("/send-url", (req, res) => __awaiter(void 0, void 0, void 0, function* 
     yield git.clone(repoUrl, outputPath);
     const files = (0, getAllfiles_1.getAllFiles)(outputPath);
     files.forEach((element) => __awaiter(void 0, void 0, void 0, function* () {
-        yield (0, upload_1.upload)(element, element.slice(__dirname.length + 1));
+        // Convert Windows backslashes to forward slashes for R2 compatibility
+        const relativePath = element.slice(__dirname.length + 1).replace(/\\/g, '/');
+        yield (0, upload_1.upload)(element, relativePath);
     }));
     yield new Promise((resolve) => setTimeout(resolve, 5000));
     // Queue the job in Redis
-    publisher.lPush("build-queue", id);
-    publisher.hSet("status", id, "uploaded");
+    redisClient.lPush("build-queue", id);
+    redisClient.hSet("status", id, "uploaded");
     // Trigger the deploy service
     try {
         const deployServiceUrl = process.env.DEPLOY_SERVICE_URL || "http://localhost:5501";
@@ -89,7 +89,7 @@ app.post("/send-url", (req, res) => __awaiter(void 0, void 0, void 0, function* 
 }));
 app.get("/status", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const id = req.query.id;
-    const response = yield subscriber.hGet("status", id);
+    const response = yield redisClient.hGet("status", id);
     res.json({
         status: response,
     });
