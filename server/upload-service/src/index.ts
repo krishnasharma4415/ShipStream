@@ -52,8 +52,30 @@ app.post("/send-url", async (req, res) => {
     await upload(element, element.slice(__dirname.length + 1));
   });
   await new Promise((resolve) => setTimeout(resolve, 5000));
+  
+  // Queue the job in Redis
   publisher.lPush("build-queue", id);
   publisher.hSet("status", id, "uploaded");
+  
+  // Trigger the deploy service
+  try {
+    const deployServiceUrl = process.env.DEPLOY_SERVICE_URL || "http://localhost:5501";
+    const response = await fetch(`${deployServiceUrl}/deploy`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!response.ok) {
+      console.error(`Failed to trigger deploy service: ${response.status} ${response.statusText}`);
+    } else {
+      console.log(`Successfully triggered deploy service for ID: ${id}`);
+    }
+  } catch (error) {
+    console.error("Error calling deploy service:", error);
+  }
+  
   res.json({ generated: id, files });
 });
 

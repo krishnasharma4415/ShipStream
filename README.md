@@ -57,7 +57,7 @@
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │  React Frontend │    │  Upload Service │    │  Deploy Service │    │ Request Handler │
-│    (Port 5173)  │───▶│    (Port 5500)  │    │  (Background)   │    │   (Port 3000)   │
+│    (Port 5173)  │───▶│    (Port 5500)  │───▶│    (Port 5501)  │    │   (Port 3000)   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
                                 │                       │                       │
                                 ▼                       ▼                       ▼
@@ -71,7 +71,7 @@
 
 - **React Frontend** (Port 5173): Modern UI with deployment management, status tracking, and history
 - **Upload Service** (Port 5500): Accepts Git URLs, clones repos, uploads to R2, queues builds
-- **Deploy Service** (Background): Processes build queue, runs npm builds, uploads built files
+- **Deploy Service** (Port 5501): Web service triggered by upload service to process builds from Redis queue
 - **Request Handler** (Port 3000): Routes requests by subdomain, serves static files from R2
 
 ## 🆓 Free Tier Stack
@@ -175,9 +175,10 @@ Test with these repositories:
 1. **Submit Repository**: User enters GitHub URL in React frontend
 2. **Clone & Upload**: Upload service clones repo and uploads files to Cloudflare R2
 3. **Queue Build**: Build job queued in Upstash Redis with unique deployment ID
-4. **Process Build**: Deploy service downloads files, runs `npm install && npm run build`
-5. **Deploy**: Built files uploaded to R2 under `/dist/{id}/` prefix
-6. **Serve**: Request handler serves app via subdomain routing
+4. **Trigger Deploy**: Upload service immediately calls deploy service `/deploy` endpoint
+5. **Process Build**: Deploy service wakes up, processes Redis queue, runs `npm install && npm run build`
+6. **Deploy**: Built files uploaded to R2 under `/dist/{id}/` prefix, deploy service goes back to sleep
+7. **Serve**: Request handler serves app via subdomain routing
 
 ### Supported Project Types
 
