@@ -1,9 +1,14 @@
+import dotenv from "dotenv";
+import path from "path";
+
+// Load environment variables from server/.env
+dotenv.config({ path: path.join(__dirname, "../../.env") });
+
 import express from "express";
 import cors from "cors";
 import { random } from "./randomGenerate";
 import simpleGit from "simple-git";
 import { getAllFiles } from "./getAllfiles";
-import path from "path";
 import { upload } from "./upload";
 import { createRedisClient } from "./redisClient";
 
