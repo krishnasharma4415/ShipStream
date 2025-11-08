@@ -1,4 +1,31 @@
 services:
+  # Authentication Service - Handles GitHub OAuth and user sessions
+  - type: web
+    name: deployfast-auth-service
+    runtime: node
+    buildCommand: cd server/auth-service && npm install && npm run build
+    startCommand: cd server/auth-service && npm start
+    plan: free
+    region: oregon
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_REDIRECT_URI
+        value: https://deployfast-auth-service.onrender.com/auth/github/callback
+      - key: JWT_SECRET
+        sync: false
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://deployfast-frontend.onrender.com
+    healthCheckPath: /health
+
   # Upload Service - Handles repository cloning and upload to R2
   - type: web
     name: deployfast-upload-service
@@ -10,6 +37,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: JWT_SECRET
+        sync: false
+      - key: AUTH_SERVICE_URL
+        value: https://deployfast-auth-service.onrender.com
       - key: R2_ACCESS_KEY_ID
         sync: false
       - key: R2_SECRET_ACCESS_KEY
@@ -21,7 +52,7 @@ services:
       - key: REDIS_URL
         sync: false
       - key: FRONTEND_URL
-        value: http://localhost:5173
+        value: https://deployfast-frontend.onrender.com
       - key: DEPLOY_SERVICE_URL
         value: https://deployfast-deploy-service.onrender.com
     healthCheckPath: /health
@@ -69,3 +100,17 @@ services:
       - key: REDIS_URL
         sync: false
     healthCheckPath: /health
+
+  # Frontend - React application
+  - type: web
+    name: deployfast-frontend
+    runtime: static
+    buildCommand: cd client && npm install && npm run build
+    staticPublishPath: client/dist
+    plan: free
+    region: oregon
+    envVars:
+      - key: VITE_AUTH_SERVICE_URL
+        value: https://deployfast-auth-service.onrender.com
+      - key: VITE_UPLOAD_SERVICE_URL
+        value: https://deployfast-upload-service.onrender.com

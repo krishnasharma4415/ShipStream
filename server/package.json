@@ -1,4 +1,10 @@
 {
+  "name": "shipstream-server",
+  "version": "1.0.0",
+  "description": "ShipStream deployment platform - Backend services",
+  "scripts": {
+    "start": "node start-services.js"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",
     "dotenv": "^17.2.3",

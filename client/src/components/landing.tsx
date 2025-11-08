@@ -8,6 +8,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { DeploymentHistory } from "./deployment-history"
 import { ThemeToggle } from "./theme-toggle"
 import { useState } from "react"
+import { Link } from "react-router-dom"
+import { useAuth } from "../hooks/useAuth"
 import axios from "axios"
 import pirateShipLogo from "../assets/pirate-ship.png"
 import {
@@ -18,7 +20,8 @@ import {
   Clock,
   Upload,
   Settings,
-  Anchor
+  Anchor,
+  User
 } from "lucide-react"
 
 const BACKEND_UPLOAD_URL = import.meta.env.VITE_API_URL || "http://localhost:5500";
@@ -30,6 +33,7 @@ interface DeploymentStatus {
 }
 
 export function Landing() {
+  const { isAuthenticated, user } = useAuth();
   const [repoUrl, setRepoUrl] = useState("");
   const [uploadId, setUploadId] = useState("");
   const [deploymentStatus, setDeploymentStatus] = useState<DeploymentStatus>({
@@ -197,10 +201,30 @@ export function Landing() {
                 alt="ShipStream Logo"
                 className="h-8 w-8 object-contain"
               />
-              <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">ShipStream</h1>
+              <h1 className="text-xl font-bold text-slate-800 dark:text-slate-200">DeployFast</h1>
               <Badge variant="secondary" className="ml-2">Beta</Badge>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center space-x-4">
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-3">
+                  <Link to="/dashboard">
+                    <Button variant="outline">Dashboard</Button>
+                  </Link>
+                  <div className="flex items-center space-x-2">
+                    <img src={user?.avatarUrl} alt={user?.username} className="w-6 h-6 rounded-full" />
+                    <span className="text-sm text-slate-600 dark:text-slate-300">{user?.username}</span>
+                  </div>
+                </div>
+              ) : (
+                <Link to="/login">
+                  <Button variant="outline">
+                    <User className="mr-2 h-4 w-4" />
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
@@ -217,12 +241,23 @@ export function Landing() {
               />
             </div>
             <h2 className="text-4xl font-bold tracking-tight">
-              Set sail with your GitHub repository
+              Deploy your GitHub repository
               <span className="text-blue-600"> instantly</span>
             </h2>
             <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-              Navigate your code to production with ShipStream. Deploy any GitHub repository in seconds with automatic builds and smooth sailing to live domains.
+              Deploy any GitHub repository in seconds with automatic builds and live domains. 
+              {!isAuthenticated && " Sign in to track and manage your deployments."}
             </p>
+            {!isAuthenticated && (
+              <div className="flex justify-center">
+                <Link to="/login">
+                  <Button size="lg" className="text-lg px-8 py-3">
+                    <User className="mr-2 h-5 w-5" />
+                    Get Started - Sign In
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Deployment Form */}

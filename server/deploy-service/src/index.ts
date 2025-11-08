@@ -77,7 +77,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5501;
+const PORT = process.env.DEPLOY_SERVICE_PORT || 5502;
 
 app.listen(PORT, () => {
   console.log(`Deploy service running on port ${PORT}`);
