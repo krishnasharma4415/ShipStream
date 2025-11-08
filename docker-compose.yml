@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  auth-service:
+    build:
+      context: ./server/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "5501:5501"
+    environment:
+      - NODE_ENV=production
+      - AUTH_SERVICE_PORT=5501
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - REDIS_URL=${REDIS_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5501/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  upload-service:
+    build:
+      context: ./server/upload-service
+      dockerfile: Dockerfile
+    ports:
+      - "5500:5500"
+    environment:
+      - NODE_ENV=production
+      - UPLOAD_SERVICE_PORT=5500
+      - AUTH_SERVICE_URL=http://auth-service:5501
+      - JWT_SECRET=${JWT_SECRET}
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      - REDIS_URL=${REDIS_URL}
+    depends_on:
+      - auth-service
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5500/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  deploy-service:
+    build:
+      context: ./server/deploy-service
+      dockerfile: Dockerfile
+    ports:
+      - "5502:5502"
+    environment:
+      - NODE_ENV=production
+      - DEPLOY_SERVICE_PORT=5502
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+      - REDIS_URL=${REDIS_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5502/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  request-handler:
+    build:
+      context: ./server/request-handler
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REQUEST_HANDLER_PORT=3000
+      - R2_ACCESS_KEY_ID=${R2_ACCESS_KEY_ID}
+      - R2_SECRET_ACCESS_KEY=${R2_SECRET_ACCESS_KEY}
+      - R2_ENDPOINT=${R2_ENDPOINT}
+      - R2_BUCKET_NAME=${R2_BUCKET_NAME}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: shipstream-network
