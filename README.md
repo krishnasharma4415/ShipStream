@@ -46,35 +46,26 @@ Docker • Docker Compose • Render.com • Environment Validation • Health C
 ## 🏗️ Architecture
 
 ```mermaid
-┌─────────────┐      ┌──────────────┐      ┌──────────────┐
-│   Frontend  │─────▶│ Auth Service │─────▶│    GitHub    │
-│  (React SPA)│      │  (Port 5501) │      │    OAuth     │
-└─────────────┘      └──────────────┘      └──────────────┘
-       │                     │
-       │                     ▼
-       │             ┌───────────────┐      ┌──────────────┐
-       └────────────▶│Upload Service │─────▶│ Cloudflare R2│
-                     │  (Port 5500)  │      │   Storage    │
-                     └───────────────┘      └──────────────┘
-                             │                      ▲
-                             ▼                      │
-                     ┌───────────────┐              │
-                     │ Redis Queue   │              │
-                     └───────────────┘              │
-                             │                      │
-                             ▼                      │
-                     ┌───────────────┐              │
-                     │Deploy Service │──────────────┘
-                     │  (Port 5502)  │
-                     └───────────────┘
-                             │
-                             ▼
-                     ┌────────────────┐
-                     │Request Handler │
-                     │  (Port 3000)   │
-                     │ Serves Deployed│
-                     │     Sites      │
-                     └────────────────┘
+graph TD
+    A[Frontend<br/>React SPA] -->|Auth Request| B[Auth Service<br/>Port 5501]
+    B -->|OAuth Flow| C[GitHub OAuth]
+    A -->|Deploy Request| D[Upload Service<br/>Port 5500]
+    D -->|Upload Files| E[Cloudflare R2<br/>Storage]
+    D -->|Add to Queue| F[Redis Queue]
+    F -->|Process| G[Deploy Service<br/>Port 5502]
+    G -->|Download Files| E
+    G -->|Upload Build| E
+    H[Request Handler<br/>Port 3000] -->|Serve Files| E
+    I[Users] -->|Access Deployed Site| H
+    
+    style A fill:#61dafb,stroke:#333,stroke-width:2px
+    style B fill:#ffd700,stroke:#333,stroke-width:2px
+    style D fill:#ffd700,stroke:#333,stroke-width:2px
+    style G fill:#ffd700,stroke:#333,stroke-width:2px
+    style H fill:#ffd700,stroke:#333,stroke-width:2px
+    style C fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style E fill:#f0f0f0,stroke:#333,stroke-width:2px
+    style F fill:#dc382d,stroke:#333,stroke-width:2px
 ```
 
 **4 Microservices:**
