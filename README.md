@@ -58,14 +58,15 @@ graph TD
     H[Request Handler<br/>Port 3000] -->|Serve Files| E
     I[Users] -->|Access Deployed Site| H
     
-    style A fill:#61dafb,stroke:#333,stroke-width:2px
-    style B fill:#ffd700,stroke:#333,stroke-width:2px
-    style D fill:#ffd700,stroke:#333,stroke-width:2px
-    style G fill:#ffd700,stroke:#333,stroke-width:2px
-    style H fill:#ffd700,stroke:#333,stroke-width:2px
-    style C fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style E fill:#f0f0f0,stroke:#333,stroke-width:2px
-    style F fill:#dc382d,stroke:#333,stroke-width:2px
+    style A fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#ffd700,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#ffd700,stroke:#333,stroke-width:2px,color:#000
+    style G fill:#ffd700,stroke:#333,stroke-width:2px,color:#000
+    style H fill:#ffd700,stroke:#333,stroke-width:2px,color:#000
+    style C fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style E fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style F fill:#dc382d,stroke:#333,stroke-width:2px,color:#fff
+    style I fill:#4a90e2,stroke:#333,stroke-width:2px,color:#fff
 ```
 
 **4 Microservices:**
