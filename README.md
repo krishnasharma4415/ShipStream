@@ -255,7 +255,7 @@ cd server/deploy-service && npm test
 
 ## 👨‍💻 Author
 
-**[Your Name]**  
+**Krishna Sharma**  
 Full-Stack Developer specializing in scalable microservices and modern web applications
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://linkedin.com/in/your-profile)
